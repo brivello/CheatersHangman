@@ -23,7 +23,7 @@ public class CheatersHangman {
      */
     public static void main(String[] args) throws FileNotFoundException {
         Map<String,HashSet<String>> map =fileToMap("dictionary.txt");
-        guessWork(map,"____","e");
+        guessWork(map,"_ _ _ _","e");
         System.out.println(map);
         guessWork(map, "a");
         System.out.println(map);
@@ -57,16 +57,22 @@ public class CheatersHangman {
         }
         map.put(possibleKeys.get(0).toString(), (HashSet<String>) notContainsGuess);
         for (String current: containsGuess){
+            //System.out.println(current);
             String keyPattern="";
-            for(int i=0; i<current.length();i++){
-                if (current.charAt(i)== guess.charAt(0)){
-                    keyPattern+=guess;
-                } else if (current.charAt(i)==' ') {
-                    keyPattern+=' ';
+            int currentIndex=0;
+            for(int i=0; i<key.length();i++){
+                if (i%2==0) {
+                    if (current.charAt(currentIndex)== guess.charAt(0)){
+                        keyPattern+=guess;
+                    } else {
+                        keyPattern+=key.charAt(i);
+                    }
+                    currentIndex++;
                 } else {
-                    keyPattern+=key.charAt(i);
+                    keyPattern+=" ";
                 }
             }
+            //System.out.println(keyPattern);
             map.get(keyPattern).add(current);
         }
         deleteAllExcept(map,largestKey(map));
@@ -133,7 +139,11 @@ public class CheatersHangman {
     public static String blankGuessOfLength(int n){
         String guess="";
         for (int i=0; i<n; i++){
-            guess+="_";
+            if (i==n-1){
+                guess+="_";
+            } else {
+                guess+="_ ";
+            }
         }
         return guess;
     }
