@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 public class CheatersHangman {
@@ -22,13 +23,21 @@ public class CheatersHangman {
      */
     public static void main(String[] args) throws FileNotFoundException {
         Map<String,HashSet<String>> map =fileToMap("dictionary.txt");
-        guessWork(map,"___","q");
-        //HashSet testSet=guessWork(list.get(3),"q");
-        
-        ArrayList keyList=getKey("_a__d_","e");
-        for (int i=0; i<keyList.size(); i++){
-            System.out.println(keyList.get(i));
-        }
+        guessWork(map,"____","e");
+        System.out.println(map);
+        guessWork(map, "a");
+        System.out.println(map);
+        guessWork(map, "e");
+        System.out.println(map);
+        guessWork(map, "i");
+        System.out.println(map);
+        guessWork(map, "o");
+        System.out.println(map);
+    }
+    
+    
+    public static void guessWork (Map<String,HashSet<String>> map,String guess){
+        guessWork(map, map.entrySet().iterator().next().getKey().toString(), guess);
     }
     
     public static void guessWork (Map<String,HashSet<String>> map,String key,String guess){
@@ -41,12 +50,42 @@ public class CheatersHangman {
                 notContainsGuess.add(word);
             }
         }
-        System.out.println(containsGuess);
-        deleteAllExcept(map, key);
-        //System.out.println(map);
-        
-        
-        
+        deleteAllExcept(map, "");
+        ArrayList possibleKeys=getKey(key,guess);
+        for (int j=1; j<possibleKeys.size(); j++){
+            map.put(possibleKeys.get(j).toString(),new <String>HashSet());
+        }
+        map.put(possibleKeys.get(0).toString(), (HashSet<String>) notContainsGuess);
+        for (String current: containsGuess){
+            String keyPattern="";
+            for(int i=0; i<current.length();i++){
+                if (current.charAt(i)== guess.charAt(0)){
+                    keyPattern+=guess;
+                } else if (current.charAt(i)==' ') {
+                    keyPattern+=' ';
+                } else {
+                    keyPattern+=key.charAt(i);
+                }
+            }
+            map.get(keyPattern).add(current);
+        }
+        deleteAllExcept(map,largestKey(map));
+    }
+    
+    public static String largestKey (Map<String,HashSet<String>> map){
+        String largestKey="";
+        int size=0;
+        Iterator it = map.entrySet().iterator();
+            while (it.hasNext()){
+                Entry item = (Entry) it.next();
+                HashSet tempSet=(HashSet) item.getValue();
+                int tempSize=tempSet.size();
+                if (tempSize>size){
+                    largestKey=item.getKey().toString();
+                    size=tempSize;
+                }
+            }
+        return largestKey;
     }
     
     public static Map<String, HashSet<String>> fileToMap(String dictFilename) throws FileNotFoundException{
@@ -58,7 +97,6 @@ public class CheatersHangman {
                 if (dict.containsKey(blankGuessOfLength(word.length()))){
                     HashSet name=dict.get(blankGuessOfLength(word.length()));
                     name.add(word);
-                    //dict.put(word.length(), word);
                 } else {
                     Set <String>newSet=new HashSet<String>();
                     newSet.add(word);
@@ -101,6 +139,11 @@ public class CheatersHangman {
     }
     public static void deleteAllExcept (Map<String,HashSet<String>> map, String key){
         Iterator it = map.entrySet().iterator();
-        /*for (String mapkey, map.entrySet())*/
+        while (it.hasNext()){
+            Entry item = (Entry) it.next();
+            if(!item.getKey().equals(key)){
+                it.remove();
+            }
+        }
     }
 }
