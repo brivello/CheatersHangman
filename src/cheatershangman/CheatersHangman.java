@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -20,7 +21,8 @@ public class CheatersHangman {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws FileNotFoundException {
-        Map<Integer,HashSet<String>> list =fileToMap("dictionary.txt");
+        Map<String,HashSet<String>> map =fileToMap("dictionary.txt");
+        guessWork(map,"___","q");
         //HashSet testSet=guessWork(list.get(3),"q");
         
         ArrayList keyList=getKey("_a__d_","e");
@@ -29,46 +31,38 @@ public class CheatersHangman {
         }
     }
     
-    public static ArrayList<String> guessWork (ArrayList<String>list , String guess){
-        Map<Integer[], Set<String>>words = new HashMap<Integer[], Set<String>>();
+    public static void guessWork (Map<String,HashSet<String>> map,String key,String guess){
         Set<String> containsGuess=new HashSet<String>();
         Set<String> notContainsGuess=new HashSet<String>();
-        for (String word: list){
+        for (String word: map.get(key)){
             if(word.contains(guess)){
                 containsGuess.add(word);
             } else {
                 notContainsGuess.add(word);
             }
         }
+        System.out.println(containsGuess);
+        deleteAllExcept(map, key);
+        //System.out.println(map);
         
-        words.put(new Integer[]{0}, notContainsGuess);
-     
-        int len = list.get(0).length();
-
-        for (int i = 0; i < len; i++) {
-            Set<String> s = new HashSet<String>();
-            for (String word : containsGuess) {
-
-            }
-        }
         
-        return null;
+        
     }
     
-    public static Map<Integer, HashSet<String>> fileToMap(String dictFilename) throws FileNotFoundException{
-        Map<Integer, HashSet<String>>dict=new HashMap <Integer, HashSet<String>>();
+    public static Map<String, HashSet<String>> fileToMap(String dictFilename) throws FileNotFoundException{
+        Map<String, HashSet<String>>dict=new HashMap <String, HashSet<String>>();
         try{
             Scanner in = new Scanner(new File(dictFilename));
             while (in.hasNextLine()){
                 String word=in.nextLine();
-                if (dict.containsKey(word.length())){
-                    HashSet name=dict.get(word.length());
+                if (dict.containsKey(blankGuessOfLength(word.length()))){
+                    HashSet name=dict.get(blankGuessOfLength(word.length()));
                     name.add(word);
                     //dict.put(word.length(), word);
                 } else {
-                    List <String>newList=new ArrayList<String>();
-                    newList.add(word);
-                    dict.putIfAbsent(word.length(), (HashSet<String>) newList);
+                    Set <String>newSet=new HashSet<String>();
+                    newSet.add(word);
+                    dict.putIfAbsent(blankGuessOfLength(word.length()), (HashSet<String>) newSet);
                 }
             }
         }
@@ -97,5 +91,16 @@ public class CheatersHangman {
             } 
         }
         return (ArrayList<String>) keyList;   
+    }
+    public static String blankGuessOfLength(int n){
+        String guess="";
+        for (int i=0; i<n; i++){
+            guess+="_";
+        }
+        return guess;
+    }
+    public static void deleteAllExcept (Map<String,HashSet<String>> map, String key){
+        Iterator it = map.entrySet().iterator();
+        /*for (String mapkey, map.entrySet())*/
     }
 }
