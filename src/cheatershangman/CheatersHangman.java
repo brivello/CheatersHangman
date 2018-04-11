@@ -10,37 +10,153 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Random;
+
 public class CheatersHangman {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws FileNotFoundException {
+        
         Map<String,HashSet<String>> map =fileToMap("dictionary.txt");
-        guessWork(map,"_ _ _ _","e");
-        System.out.println(map);
-        guessWork(map, "a");
-        System.out.println(map);
-        guessWork(map, "e");
-        System.out.println(map);
-        guessWork(map, "i");
-        System.out.println(map);
-        guessWork(map, "o");
-        System.out.println(map);
+        Scanner in = new Scanner(System.in);
+   
+        System.out.println("Welcome to Hangman!");
+        int len;
+
+        do {
+            System.out.println("Please enter the length of the word you would like to guess:");
+            len = 0;
+            try {
+
+                String length = in.nextLine();
+                len = Integer.parseInt(length);
+                if (len <= 0 || len>45) {
+                    throw new IndexOutOfBoundsException();
+                }
+                
+            } catch (Exception e) {
+                System.out.println("Invalid entry. Please enter a valid entry.");
+                len = 0;
+            }
+        } while (len == 0);
+
+        int guessnum;
+        
+        do {
+            System.out.println("Please enter the number of the guesses you would like to allow:");
+            guessnum = 0;
+            try {
+
+                String length = in.nextLine();
+                guessnum = Integer.parseInt(length);
+
+            } catch (Exception e) {
+                System.out.println("Invalid entry. Please enter a valid entry.");
+                guessnum = 0;
+            }
+        } while (guessnum == 0);
+
+
+        
+        System.out.println("Time to begin guessing!");
+        String progress = blankGuessOfLength(len);
+        System.out.println(progress);
+        
+        int currentguess = 0;
+        ArrayList<Character> list = new ArrayList<Character>();
+        do {
+            try {
+                System.out.println("Please enter a guess:");
+                String guess = in.nextLine();
+                if (guess.length() > 1) {
+                    throw new IndexOutOfBoundsException();
+                }
+                char c = guess.charAt(0);
+                if(!guess.matches("[a-zA-Z]{1}")){
+                    throw new IndexOutOfBoundsException();
+                }else{
+                    guess = guess.toLowerCase();
+                }
+                if(list.contains(c)){
+                    System.out.println("You have already entered that. Please try again.");
+                    
+                    System.out.println();
+                    throw new NegativeArraySizeException();
+                }else{
+                    list.add(c);
+                }
+                if(currentguess==0){
+                    guessWork(map, progress, guess);
+                }else{
+                    if(guessWork(map, guess)){
+                        currentguess--;
+                    }
+                    
+                }
+            } catch (Exception e) {
+                System.out.println("Inavlid entry: please enter a valid entry");
+                currentguess--;
+            }
+            currentguess++;
+            if (!progress.contains("_")) {
+                System.out.println(map.keySet());
+                System.out.println("CORRECT! YOU'VE WON!!!");
+                System.exit(0);
+            }
+            
+            System.out.println("Previous guesses:" + list);
+            System.out.println("Current progress: " + map.keySet());
+            int diff = guessnum-currentguess;
+            System.out.println("You have " + diff +" guesses left");
+
+        } while (currentguess < guessnum);
+        System.out.println();
+        System.out.println("Sorry...out of guesses");
+        Random rand = new Random();
+        int x = rand.nextInt();
+        int y = x%(map.get(map.entrySet().iterator().next().getKey()).size()-1);
+        Iterator it = map.get(map.entrySet().iterator().next().getKey()).iterator();
+        String solution = ""; 
+        
+        for (int i = 0; i < y; i++) {
+            solution = (String) it.next();
+        }
+        
+        System.out.println("The correct solution was " + solution);
+
+
+/*
+        Map<String,HashSet<String>> dog =fileToMap("dictionary.txt");
+        guessWork(dog,"_ _ _ _","e");
+        System.out.println(dog);
+        guessWork(dog, "o");
+        System.out.println(dog);
+        guessWork(dog, "a");
+        System.out.println(dog);
+        guessWork(dog, "i");
+        System.out.println(dog);
+        guessWork(dog, "e");
+        System.out.println(dog);
+        guessWork(dog, "u");
+        System.out.println(dog);
+*/
+        
+
     }
     
-    
-    public static void guessWork (Map<String,HashSet<String>> map,String guess){
-        guessWork(map, map.entrySet().iterator().next().getKey().toString(), guess);
+    public static boolean guessWork (Map<String,HashSet<String>> map,String guess){
+        return guessWork(map, map.entrySet().iterator().next().getKey().toString(), guess);
     }
     
-    public static void guessWork (Map<String,HashSet<String>> map,String key,String guess){
+    public static boolean guessWork (Map<String,HashSet<String>> map,String key,String guess){
         Set<String> containsGuess=new HashSet<String>();
         Set<String> notContainsGuess=new HashSet<String>();
         for (String word: map.get(key)){
@@ -76,6 +192,12 @@ public class CheatersHangman {
             map.get(keyPattern).add(current);
         }
         deleteAllExcept(map,largestKey(map));
+        
+        if(map.entrySet().iterator().next().getKey().toString()==key){
+            return false;
+        }else{
+            return  true;
+        }
     }
     
     public static String largestKey (Map<String,HashSet<String>> map){
